@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <vector>
 #include <iostream>
 
 
@@ -17,15 +18,21 @@ int main()
 	sf::RenderWindow window(sf::VideoMode({ 1200,800 }), "New entity");
 	window.setFramerateLimit(60);
 
-	sf::RectangleShape player(sf::Vector2f({50, 50}));
-	player.setOutlineColor(sf::Color::White);
-	player.setPosition({ 10, 20 });
+	sf::RectangleShape block = sf::RectangleShape({ 100,100 });
+	block.setFillColor(sf::Color::Green);
+	block.setPosition({ 200,300 });
 
+	sf::RectangleShape block2 = sf::RectangleShape({ 100,100 });
+	block2.setFillColor(sf::Color::Green);
+	block2.setPosition({ 800,300 });
+	
 	sf::CircleShape player2;
 	player2.setRadius(50);
 	player2.setOutlineColor(sf::Color::Blue);
 	player2.setOutlineThickness(5);
 	player2.setPosition({ 520, 340 });
+
+	
 
 
 	while (window.isOpen())
@@ -34,6 +41,8 @@ int main()
 			if (event->is<sf::Event::Closed>())
 				window.close();
 		}
+
+		sf::Vector2 prevPos = player2.getPosition();
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::H))
 		{
@@ -60,10 +69,31 @@ int main()
 			player2.move({ 10.f,0.f });
 		}
 
+		if (player2.getGlobalBounds().findIntersection(block.getGlobalBounds())) {
+			std::cout << "Collision detected!" << std::endl;
+			player2.setPosition(prevPos);
+			block.setFillColor(sf::Color::Red);
+		}
+		else
+		{
+			block.setFillColor(sf::Color::Green);
+		}
+		if (player2.getGlobalBounds().findIntersection(block2.getGlobalBounds())) {
+			player2.setPosition(prevPos);
+			std::cout << "Collision detected!" << std::endl;
+			block2.setFillColor(sf::Color::Red);
+		}
+		else
+		{
+			block2.setFillColor(sf::Color::Green);
+		}
+
+		
+
 		window.clear();
 
-
-		window.draw(player);
+		window.draw(block);
+		window.draw(block2);
 		window.draw(player2);
 		
 
