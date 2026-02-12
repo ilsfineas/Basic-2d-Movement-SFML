@@ -1,7 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <iostream>
-
+#include <random>
 
 void writeCommands()
 {
@@ -26,14 +26,26 @@ int main()
 	block2.setFillColor(sf::Color::Green);
 	block2.setPosition({ 800,300 });
 	
+	sf::RectangleShape collectable = sf::RectangleShape({ 10,25 });
+	collectable.setFillColor(sf::Color::Yellow);
+	collectable.setPosition({ 600,100 });
+
 	sf::CircleShape player2;
-	player2.setRadius(50);
+	player2.setRadius(25);
 	player2.setOutlineColor(sf::Color::Blue);
 	player2.setOutlineThickness(5);
 	player2.setPosition({ 520, 340 });
 
-	
+	int lower_bound = 0;
+	int upper_bound = 1000;
 
+
+	//random number generator for collectable
+	std::random_device random;
+	std::mt19937 gen(random());
+	std::uniform_int_distribution<> dist(lower_bound, upper_bound);
+
+	
 
 	while (window.isOpen())
 	{
@@ -43,6 +55,7 @@ int main()
 		}
 
 		sf::Vector2 prevPos = player2.getPosition();
+		sf::Vector2f pos = player2.getPosition();
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::H))
 		{
@@ -69,6 +82,14 @@ int main()
 			player2.move({ 10.f,0.f });
 		}
 
+		// come back out of map if player goes out of bounds
+		if (pos.x < 0) player2.setPosition({ 1200,pos.y });
+		if (pos.x > 1200) player2.setPosition({ 0,pos.y });
+		if (pos.y < 0) player2.setPosition({ pos.x,800 });
+		if (pos.y > 800) player2.setPosition({ pos.x,0 });
+		
+
+
 		if (player2.getGlobalBounds().findIntersection(block.getGlobalBounds())) {
 			std::cout << "Collision detected!" << std::endl;
 			player2.setPosition(prevPos);
@@ -88,12 +109,23 @@ int main()
 			block2.setFillColor(sf::Color::Green);
 		}
 
+		// collision with collecatble
+		if (player2.getGlobalBounds().findIntersection(collectable.getGlobalBounds())) {
+			float newX = static_cast<float>(dist(gen) % 1150); // Keep it slightly inside
+			float newY = static_cast<float>(dist(gen) % 750);
+
+			std::cout << "Collected! Moving to: x=" << newX << ", y=" << newY << std::endl;
+			collectable.setPosition({ newX, newY });
+		}
+
+
 		
 
 		window.clear();
 
 		window.draw(block);
 		window.draw(block2);
+		window.draw(collectable);
 		window.draw(player2);
 		
 
